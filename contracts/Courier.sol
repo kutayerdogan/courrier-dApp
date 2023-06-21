@@ -22,7 +22,8 @@ contract Courier {
     mapping (uint => address payable) public packageCourierId;
     mapping (address => uint) public pendingDeliveryCharge;
     mapping (uint => Package) public packages;
-
+    mapping (address => uint[]) public senderPackages;
+    mapping (address => uint[]) public receiverPackages;
     event PackageBooked(uint id, address sender, address receiver, uint weight);
     event PackagePicked(uint id, address courier, address sender, address receiver);
     event PackageArrived(uint id, address courier, address sender, address receiver);
@@ -102,5 +103,16 @@ contract Courier {
         } else {
             return false;
         }
+    }
+    
+
+    event PackageLocationUpdated(uint id, address courier, uint latitude, uint longitude);
+
+    // Function to update the current location of a package during transit
+    function updatePackageLocation(uint _id, uint _latitude, uint _longitude) public {
+        Package storage currentPackage = packages[_id];
+        require(currentPackage.status == PackageStatus.inTransit, "Package is not in transit");
+
+        emit PackageLocationUpdated(_id, msg.sender, _latitude, _longitude);
     }
 }
